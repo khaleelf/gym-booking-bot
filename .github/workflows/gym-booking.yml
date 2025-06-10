@@ -1,0 +1,42 @@
+name: Gym Booking Bot
+
+on:
+  schedule:
+    # Run at 9 AM UTC on Tuesday, Thursday, Sunday
+    - cron: '0 9 * * 0,2,4'
+  workflow_dispatch: # Allows manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  book-gym:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run booking script
+      env:
+        GYM_EMAIL_1: ${{ secrets.GYM_EMAIL_1 }}
+        GYM_PASSWORD_1: ${{ secrets.GYM_PASSWORD_1 }}
+        GYM_EMAIL_2: ${{ secrets.GYM_EMAIL_2 }}
+        GYM_PASSWORD_2: ${{ secrets.GYM_PASSWORD_2 }}
+      run: python main.py
+    
+    - name: Commit and push updated calendar
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add crossfit_calendar_events.ics
+        git commit -m "Updating Calendar with new event."
+        git push
