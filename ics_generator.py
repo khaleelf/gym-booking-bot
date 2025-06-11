@@ -28,4 +28,9 @@ def update_calendar(date):
 
     # Write the calendar to an .ics file
     with open(file_path, 'w') as f:
-        f.writelines(cal.serialize_iter())
+        lines = ''.join(cal.serialize()).split('\n')
+        for line in lines:
+            if line.startswith("DTEND") or line.startswith("DTSTART"):
+                f.write(line.replace('Z', ''))
+            else:
+                f.write(line)
